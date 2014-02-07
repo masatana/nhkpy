@@ -7,8 +7,6 @@ import urllib.request
 from urllib.error import HTTPError
 from pprint import pprint
 
-from const import *
-
 API_KEY = "YOUR_API_KEY"
 
 NHK_PROGRAM_LIST_API_URL_V1 = "http://api.nhk.or.jp/v1/pg/list/{area}/{service}/{date}.json?key={apikey}"
@@ -25,11 +23,15 @@ class NHKProgramList:
                 apikey=apikey)
         try:
             filename, headers = urllib.request.urlretrieve(self._url)
-        except urllib.error.HTTPError:
-            raise Exception(self._url)
+        except urllib.error.HTTPError as e:
+            raise Exception(e.reason)
         else:
             with open(filename) as f:
                 self._program_list = json.load(f)
+
+    @property
+    def program_list(self):
+        return self._program_list
 
 
 class NHKProgramGenre:
@@ -37,15 +39,20 @@ class NHKProgramGenre:
         self._url = NHK_PROGRAM_GENRE_API_URL_V1.format(
                 area=area,
                 service=service,
+                genre=genre,
                 date=date,
                 apikey=apikey)
         try:
             filename, headers = urllib.request.urlretrieve(self._url)
-        except urllib.error.HTTPError:
-            raise Exception(self._url)
+        except urllib.error.HTTPError as e:
+            raise Exception(e.reason)
         else:
             with open(filename) as f:
                 self._genre_list = json.load(f)
+
+    @property
+    def genre_list(self):
+        return self._genre_list
 
 class NHKProgramInfo:
     def __init__(self, area, service, Id, apikey):
@@ -56,11 +63,15 @@ class NHKProgramInfo:
                 apikey=apikey)
         try:
             filename, headers = urllib.request.urlretrieve(self._url)
-        except urllib.error.HTTPError:
-            raise Exception(self._url)
+        except urllib.error.HTTPError as e:
+            raise Exception(e.reason)
         else:
             with open(filename) as f:
                 self._program_info = json.load(f)
+
+    @property
+    def program_info(self):
+        return self._program_info
 
 class NHKNowOnAir:
     def __init__(self, area, service, apikey):
@@ -77,9 +88,20 @@ class NHKNowOnAir:
             with open(filename) as f:
                 self._now_on_air = json.load(f)
 
+
+    @property
+    def now_on_air(self):
+        return self._now_on_air
+
 def main():
     nhkprogramlist = NHKProgramList("130", "g1", "2014-02-07", API_KEY)
-
+    pprint(nhkprogramlist.program_list)
+    nhkprogramgenre = NHKProgramGenre("130", "g1", "0000", "2014-02-07", API_KEY)
+    pprint(nhkprogramgenre.genre_list)
+    nhkprograminfo = NHKProgramInfo("130", "g1", "2014020702065", API_KEY)
+    pprint(nhkprograminfo)
+    nhknowonair = NHKNowOnAir("130", "g1", API_KEY)
+    pprint(nhknowonair.now_on_air)
 
 if __name__ == "__main__":
     main()
