@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import json
+import datetime
 import urllib.parse
 import urllib.request
 from urllib.error import HTTPError
@@ -14,12 +15,24 @@ NHK_PROGRAM_GENRE_API_URL_V1 = "http://api.nhk.or.jp/v1/pg/genre/{area}/{service
 NHK_PROGRAM_INFO_API_URL_V1 = "http://api.nhk.or.jp/v1/pg/info/{area}/{service}/{Id}.json?key={apikey}"
 NHK_NOW_ON_AIR_API_URL_V1 = "http://api.nhk.or.jp/v1/pg/now/{area}/{service}.json?key={apikey}"
 
+def check_date(date):
+    if is_valid_date(date):
+        checked_date = date
+    elif date == "today":
+        checked_date = datetime.date.today().strftime("%Y-%m-%d")
+    elif date == "tomorrow":
+        checked_date = datetime.datetime.today().strftime("%Y-%m-%d")
+    else:
+        pass
+
+
 class NHKProgramList:
     def __init__(self, area, service, date, apikey):
+        checked_date = check_date(date)
         self._url = NHK_PROGRAM_LIST_API_URL_V1.format(
                 area=area,
                 service=service,
-                date=date,
+                date=checked_date,
                 apikey=apikey)
         try:
             filename, headers = urllib.request.urlretrieve(self._url)
@@ -87,7 +100,6 @@ class NHKNowOnAir:
         else:
             with open(filename) as f:
                 self._now_on_air = json.load(f)
-
 
     @property
     def now_on_air(self):
