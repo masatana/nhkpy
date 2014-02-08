@@ -23,7 +23,7 @@ def check_date(date):
     elif date == "tomorrow":
         checked_date = datetime.datetime.today().strftime("%Y-%m-%d")
     else:
-        pass
+        raise Exception("Something error: {date}".format(date))
 
 
 class NHKProgramList:
@@ -49,11 +49,12 @@ class NHKProgramList:
 
 class NHKProgramGenre:
     def __init__(self, area, service, genre, date, apikey):
+        checked_date = check_date(date)
         self._url = NHK_PROGRAM_GENRE_API_URL_V1.format(
                 area=area,
                 service=service,
                 genre=genre,
-                date=date,
+                date=checked_date,
                 apikey=apikey)
         try:
             filename, headers = urllib.request.urlretrieve(self._url)
