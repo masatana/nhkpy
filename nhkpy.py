@@ -16,14 +16,23 @@ NHK_PROGRAM_INFO_API_URL_V1 = "http://api.nhk.or.jp/v1/pg/info/{area}/{service}/
 NHK_NOW_ON_AIR_API_URL_V1 = "http://api.nhk.or.jp/v1/pg/now/{area}/{service}.json?key={apikey}"
 
 def check_date(date):
+    def is_valid_date(date):
+        try:
+            datetime.datetime.strptime(date, "%Y-%m-%d")
+        except ValueError:
+            return False
+        else:
+            return True
     if is_valid_date(date):
         checked_date = date
     elif date == "today":
         checked_date = datetime.date.today().strftime("%Y-%m-%d")
     elif date == "tomorrow":
-        checked_date = datetime.datetime.today().strftime("%Y-%m-%d")
+        checked_date = (datetime.datetime.today()
+            + datetime.timedelta(days = 1)).strftime("%Y-%m-%d")
     else:
         raise Exception("Something error: {date}".format(date))
+    return checked_date
 
 
 class NHKProgramList:
@@ -35,6 +44,7 @@ class NHKProgramList:
                 date=checked_date,
                 apikey=apikey)
         try:
+            print(self._url)
             filename, headers = urllib.request.urlretrieve(self._url)
         except urllib.error.HTTPError as e:
             raise Exception(e.reason)
@@ -57,6 +67,7 @@ class NHKProgramGenre:
                 date=checked_date,
                 apikey=apikey)
         try:
+            print(self._url)
             filename, headers = urllib.request.urlretrieve(self._url)
         except urllib.error.HTTPError as e:
             raise Exception(e.reason)
@@ -76,6 +87,7 @@ class NHKProgramInfo:
                 Id=Id,
                 apikey=apikey)
         try:
+            print(self._url)
             filename, headers = urllib.request.urlretrieve(self._url)
         except urllib.error.HTTPError as e:
             raise Exception(e.reason)
@@ -95,6 +107,7 @@ class NHKNowOnAir:
                 apikey=apikey)
 
         try:
+            print(self._url)
             filename, headers = urllib.request.urlretrieve(self._url)
         except urllib.error.HTTPError:
             raise Exception(self._url)
@@ -107,11 +120,11 @@ class NHKNowOnAir:
         return self._now_on_air
 
 def main():
-    nhkprogramlist = NHKProgramList("130", "g1", "2014-02-07", API_KEY)
+    nhkprogramlist = NHKProgramList("130", "g1", "today", API_KEY)
     pprint(nhkprogramlist.program_list)
-    nhkprogramgenre = NHKProgramGenre("130", "g1", "0000", "2014-02-07", API_KEY)
+    nhkprogramgenre = NHKProgramGenre("130", "g1", "0000", "today", API_KEY)
     pprint(nhkprogramgenre.genre_list)
-    nhkprograminfo = NHKProgramInfo("130", "g1", "2014020702065", API_KEY)
+    nhkprograminfo = NHKProgramInfo("130", "g1", "2014020802071", API_KEY)
     pprint(nhkprograminfo)
     nhknowonair = NHKNowOnAir("130", "g1", API_KEY)
     pprint(nhknowonair.now_on_air)
